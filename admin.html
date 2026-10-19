@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RENTX - Owner & Admin Dashboard. Fleet management, customer logs, and rental tracking.">
+    <title>Owner Dashboard – RENTX Admin</title>
+    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>">
+</head>
+<body>
+
+<!-- OWNER / ADMIN NAVIGATION -->
+<nav class="navbar">
+    <div class="navbar-brand">
+        <div class="brand-logo" style="background:linear-gradient(135deg, #fff, #888); color:#000;">RX</div>
+        <div>
+            <span class="brand-name">RENTX <span style="font-size:0.75rem; vertical-align:middle; margin-left:6px; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; font-weight:600;">👑 OWNER PORTAL</span></span>
+            <span class="brand-subtitle">Internal Fleet & Rental Management</span>
+        </div>
+    </div>
+    <ul class="nav-links">
+        <li><a href="admin.html" class="active">🏠 Dashboard</a></li>
+        <li><a href="vehicles.html">🚗 Vehicles</a></li>
+        <li><a href="customers.html">👥 Customers</a></li>
+        <li><a href="rental.html">🔑 Rent</a></li>
+        <li><a href="return.html">↩️ Return</a></li>
+        <li><a href="history.html">📋 History</a></li>
+    </ul>
+    <div style="display:flex; align-items:center; gap:0.75rem; margin-left:auto;">
+        <a href="index.html" class="btn btn-outline btn-sm" title="View website as a customer">
+            👤 Switch to Customer View
+        </a>
+        <button onclick="logoutAdmin()" class="btn btn-sm" style="background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text-secondary);" title="Exit admin session">
+            🚪 Logout
+        </button>
+    </div>
+</nav>
+
+<!-- ADMIN HERO / BANNER -->
+<section class="hero" style="padding: 2.5rem 2rem 2rem;">
+    <div style="display:inline-block; margin-bottom:0.75rem; padding:4px 14px; border-radius:999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); font-size:0.8rem; font-weight:600; letter-spacing:0.5px;">
+        👑 OWNER / ADMIN MANAGEMENT SYSTEM
+    </div>
+    <h1 style="font-size:2.2rem; margin-bottom:0.5rem;">Rental Operations <span>Overview</span></h1>
+    <p>Monitor your fleet in real-time, register new vehicles, inspect customer activity, and process returns.</p>
+    <div class="hero-actions" style="margin-top:1.25rem;">
+        <a href="vehicles.html" class="btn btn-primary btn-lg">🚗 Manage Fleet</a>
+        <a href="rental.html" class="btn btn-outline btn-lg">🔑 Issue Rental</a>
+        <a href="return.html" class="btn btn-success btn-lg">↩️ Process Return</a>
+    </div>
+</section>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+    <!-- DASHBOARD STATS -->
+    <div class="stats-grid fade-in" id="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">🚘</div>
+            <div class="stat-info">
+                <h3 id="stat-total-vehicles">—</h3>
+                <p>Total Vehicles</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <h3 id="stat-available">—</h3>
+                <p>Available</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🔑</div>
+            <div class="stat-info">
+                <h3 id="stat-rented">—</h3>
+                <p>Rented Out</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+                <h3 id="stat-customers">—</h3>
+                <p>Customers</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-info">
+                <h3 id="stat-active-rentals">—</h3>
+                <p>Active Rentals</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK LINKS + RECENT ACTIVITY -->
+    <div class="two-col">
+        <!-- Quick Actions -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h2>⚡ Quick Actions</h2>
+            </div>
+            <div class="card-body" style="display:flex; flex-direction:column; gap:0.75rem;">
+                <a href="vehicles.html" class="btn btn-outline" style="width:100%; justify-content:start;">
+                    🚗 &nbsp; View & Manage Vehicles
+                </a>
+                <a href="customers.html" class="btn btn-outline" style="width:100%; justify-content:start;">
+                    👥 &nbsp; View & Add Customers
+                </a>
+                <a href="rental.html" class="btn btn-primary" style="width:100%; justify-content:start;">
+                    🔑 &nbsp; Rent a Vehicle
+                </a>
+                <a href="return.html" class="btn btn-success" style="width:100%; justify-content:start;">
+                    ↩️ &nbsp; Return a Vehicle
+                </a>
+                <a href="history.html" class="btn btn-outline" style="width:100%; justify-content:start;">
+                    📋 &nbsp; View Rental History & Revenue
+                </a>
+                <a href="index.html" class="btn btn-outline" style="width:100%; justify-content:start; border-color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.03);">
+                    👤 &nbsp; Open Customer Booking Portal
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Rentals -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h2>🕐 Recent Rentals & Activity</h2>
+                <a href="history.html" class="btn btn-outline btn-sm">View All</a>
+            </div>
+            <div id="recent-rentals-list">
+                <div class="loading-overlay">
+                    <div class="spinner"></div> Loading recent logs...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OOP Info Banner -->
+    <div class="card fade-in" style="margin-top:1.5rem; background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.12);">
+        <div class="card-body" style="display:flex; flex-wrap:wrap; gap:2rem; align-items:center;">
+            <div style="flex:1; min-width:200px;">
+                <h3 style="font-size:1rem; margin-bottom:0.5rem; color:var(--text-primary);">🎓 OOP Concepts Demonstrated</h3>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">Core Java Object-Oriented principles powering this rental system backend</p>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+                <span class="chip">Abstraction</span>
+                <span class="chip">Inheritance</span>
+                <span class="chip">Polymorphism</span>
+                <span class="chip">Encapsulation</span>
+                <span class="chip">Method Overriding</span>
+                <span class="chip">Custom Exceptions</span>
+                <span class="chip">ArrayList</span>
+                <span class="chip">HashMap</span>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script src="js/app.js"></script>
+<script>
+    // Ensure admin session flag
+    sessionStorage.setItem('isAdmin', 'true');
+
+    function logoutAdmin() {
+        sessionStorage.removeItem('isAdmin');
+        showToast('Logged out of Admin Portal.', 'info');
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 500);
+    }
+
+    // Load dashboard statistics
+    async function loadDashboard() {
+        try {
+            // Load stats
+            const stats = await apiFetch('/vehicles/stats');
+            document.getElementById('stat-total-vehicles').textContent = stats.totalVehicles ?? 0;
+            document.getElementById('stat-available').textContent = stats.availableVehicles ?? 0;
+            document.getElementById('stat-rented').textContent = stats.rentedVehicles ?? 0;
+            document.getElementById('stat-customers').textContent = stats.totalCustomers ?? 0;
+            document.getElementById('stat-active-rentals').textContent = stats.activeRentals ?? 0;
+
+            // Load recent rentals
+            const rentals = await apiFetch('/rentals');
+            const container = document.getElementById('recent-rentals-list');
+
+            if (!rentals || rentals.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>No rentals yet. <a href="rental.html" style="color:var(--text-primary); text-decoration:underline;">Rent a vehicle</a> to get started.</p></div>`;
+                return;
+            }
+
+            // Show last 5 rentals
+            const recent = rentals.slice(-5).reverse();
+            container.innerHTML = `
+                <div style="padding:0.5rem 0;">
+                    ${recent.map(r => `
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.875rem 1.5rem; border-bottom:1px solid var(--border);">
+                            <div>
+                                <div style="font-weight:600; font-size:0.875rem;">${r.rentalId} — ${r.vehicle?.model || '—'}</div>
+                                <div style="font-size:0.78rem; color:var(--text-muted);">${r.customer?.name || '—'} (${r.customer?.customerId || '—'}) · ${formatDate(r.rentalDate)}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                ${statusBadge(r.status)}
+                                <div style="font-size:0.78rem; color:var(--text-primary); font-weight:700; margin-top:0.2rem;">${formatCurrency(r.totalAmount)}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+        } catch (err) {
+            document.getElementById('recent-rentals-list').innerHTML =
+                `<div class="empty-state"><div class="icon">⚠️</div><h3>Backend not connected</h3><p>${err.message}</p></div>`;
+            ['stat-total-vehicles','stat-available','stat-rented','stat-customers','stat-active-rentals']
+                .forEach(id => document.getElementById(id).textContent = 'ERR');
+            showToast(err.message, 'error');
+        }
+    }
+
+    loadDashboard();
+</script>
+</body>
+</html>

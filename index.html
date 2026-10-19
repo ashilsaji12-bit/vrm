@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RENTX - Find and rent cars, bikes, and trucks with transparent rates and instant booking.">
+    <title>RENTX – Premium Vehicle Rental Platform</title>
+    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+</head>
+<body>
+
+<!-- CUSTOMER NAVIGATION -->
+<nav class="navbar">
+    <div class="navbar-brand">
+        <div class="brand-logo">RX</div>
+        <div>
+            <span class="brand-name">RENTX</span>
+            <span class="brand-subtitle">Vehicle Rental Service</span>
+        </div>
+    </div>
+
+    <ul class="nav-links">
+        <li><a href="#fleet-section" class="active">🚗 Browse Fleet</a></li>
+        <li><a href="#how-it-works">⚡ How It Works</a></li>
+        <li><a href="#my-bookings-section">📋 My Bookings</a></li>
+    </ul>
+
+    <!-- Top Right Switch: Admin Login / Owner Portal -->
+    <div id="admin-nav-container" style="margin-left:auto; display:flex; align-items:center; gap:0.5rem;">
+        <button onclick="openModal('admin-login-modal')" class="admin-switch-btn" id="admin-login-btn">
+            <span>🔐</span> Admin Login
+        </button>
+    </div>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+    <div style="display:inline-block; margin-bottom:1rem; padding:4px 14px; border-radius:999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); font-size:0.85rem; font-weight:600;">
+        ✨ Fast, Flexible, and Transparent Vehicle Rentals
+    </div>
+    <h1>Drive Your World with <span>RENTX</span></h1>
+    <p>Rent cars for weekend getaways, bikes for city commutes, or trucks for cargo transport. Instant quotes, easy verification, and zero hidden fees.</p>
+    <div class="hero-actions">
+        <a href="#fleet-section" class="btn btn-primary btn-lg">🚗 Explore Available Fleet</a>
+        <a href="#my-bookings-section" class="btn btn-outline btn-lg">🔍 Track My Booking</a>
+    </div>
+</section>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+    <!-- FLEET CATALOG SECTION -->
+    <section id="fleet-section" style="scroll-margin-top: 80px;">
+        <div style="display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:1rem; margin-bottom:1.5rem;">
+            <div>
+                <h2 style="font-size:1.8rem; font-weight:800; color:#fff; letter-spacing:-0.5px;">🚗 Available Vehicle Fleet</h2>
+                <p style="color:var(--text-secondary); font-size:0.9rem;">Browse models, check daily rates, and book your ride instantly.</p>
+            </div>
+            <!-- Category Tabs -->
+            <div class="category-tabs">
+                <button class="category-tab-btn active" onclick="setCategoryFilter('ALL', this)">
+                    🌐 All Vehicles
+                </button>
+                <button class="category-tab-btn" onclick="setCategoryFilter('Car', this)">
+                    🚗 Cars
+                </button>
+                <button class="category-tab-btn" onclick="setCategoryFilter('Bike', this)">
+                    🏍️ Bikes
+                </button>
+                <button class="category-tab-btn" onclick="setCategoryFilter('Truck', this)">
+                    🚛 Trucks
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter & Search Controls Bar -->
+        <div class="filter-bar" style="margin-bottom:1.25rem;">
+            <div class="search-input" style="flex:2; min-width:220px;">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-vehicle" placeholder="Search by model, ID (e.g. Swift, R15, Tata)..." oninput="renderCustomerFleet()">
+            </div>
+            
+            <div style="display:flex; align-items:center; gap:0.5rem; background:var(--bg-input); border:1px solid var(--border); padding:0.6rem 1rem; border-radius:var(--radius-md);">
+                <input type="checkbox" id="filter-available-only" style="cursor:pointer; accent-color:#fff;" onchange="renderCustomerFleet()">
+                <label for="filter-available-only" style="font-size:0.85rem; color:var(--text-secondary); cursor:pointer; user-select:none;">
+                    Available Only
+                </label>
+            </div>
+
+            <select class="filter-select" id="sort-vehicles" onchange="renderCustomerFleet()" style="flex:1; min-width:180px;">
+                <option value="default">Sort by: Default</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name">Vehicle Name: A to Z</option>
+            </select>
+        </div>
+
+        <!-- Count Indicator -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+            <span id="fleet-count" style="font-size:0.85rem; color:var(--text-muted);">Loading fleet...</span>
+        </div>
+
+        <!-- Vehicles Grid -->
+        <div id="fleet-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:1.5rem;">
+            <div class="loading-overlay"><div class="spinner"></div> Loading vehicles...</div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS SECTION -->
+    <section id="how-it-works" style="margin-top:4rem; scroll-margin-top:80px;">
+        <div style="text-align:center; max-width:600px; margin:0 auto 2.5rem;">
+            <div class="chip" style="margin-bottom:0.75rem;">SIMPLE 4-STEP PROCESS</div>
+            <h2 style="font-size:1.8rem; font-weight:800; color:#fff;">How RENTX Works</h2>
+            <p style="color:var(--text-secondary); font-size:0.9rem;">Renting a vehicle has never been this straightforward.</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.5rem;">
+            <div class="card" style="padding:1.5rem;">
+                <div style="font-size:2rem; margin-bottom:0.75rem;">1️⃣</div>
+                <h3 style="font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:0.4rem;">Select Your Vehicle</h3>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">Browse through cars, sports bikes, and cargo trucks with transparent daily pricing.</p>
+            </div>
+
+            <div class="card" style="padding:1.5rem;">
+                <div style="font-size:2rem; margin-bottom:0.75rem;">2️⃣</div>
+                <h3 style="font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:0.4rem;">Customer Identification</h3>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">Returning customers enter their Customer ID. First-timers enter their phone number and receive an auto-generated unique ID.</p>
+            </div>
+
+            <div class="card" style="padding:1.5rem;">
+                <div style="font-size:2rem; margin-bottom:0.75rem;">3️⃣</div>
+                <h3 style="font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:0.4rem;">Instant Quote & Confirm</h3>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">See the live polymorphic price breakdown based on days and distance. Confirm with 1 click.</p>
+            </div>
+
+            <div class="card" style="padding:1.5rem;">
+                <div style="font-size:2rem; margin-bottom:0.75rem;">4️⃣</div>
+                <h3 style="font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:0.4rem;">Drive & Track</h3>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">Save your unique Customer ID to track all your active and previous bookings on this page anytime.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- MY BOOKINGS LOOKUP SECTION -->
+    <section id="my-bookings-section" style="margin-top:4rem; scroll-margin-top:80px;">
+        <div class="card" style="padding:2rem;">
+            <div style="max-width:650px; margin:0 auto; text-align:center;">
+                <div style="font-size:2rem; margin-bottom:0.5rem;">📋</div>
+                <h2 style="font-size:1.6rem; font-weight:800; color:#fff; margin-bottom:0.4rem;">Track Your Bookings</h2>
+                <p style="color:var(--text-secondary); font-size:0.875rem; margin-bottom:1.5rem;">
+                    Enter your Customer ID (e.g. <code>CUST001</code>) or your registered Phone Number to view your rentals.
+                </p>
+
+                <form onsubmit="lookupMyBookings(event)" style="display:flex; gap:0.5rem; margin-bottom:1.5rem;">
+                    <div class="search-input" style="flex:1;">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="my-bookings-input" placeholder="Enter Customer ID or Phone (e.g. CUST001 / 9876543210)" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="white-space:nowrap;">
+                        Find Bookings
+                    </button>
+                </form>
+            </div>
+
+            <!-- Results Display Area -->
+            <div id="my-bookings-results" style="max-width:900px; margin:0 auto;"></div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ======================================================
+     BOOKING MODAL (CUSTOMER FACING)
+     ====================================================== -->
+<div class="modal-overlay" id="booking-modal">
+    <div class="modal" style="max-width:550px;">
+        <div class="modal-header">
+            <h3>⚡ Book Vehicle</h3>
+            <button class="modal-close" onclick="closeModal('booking-modal')">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- Selected Vehicle Summary Bar -->
+            <div style="display:flex; align-items:center; gap:1rem; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1.25rem;">
+                <div id="modal-vehicle-icon" style="font-size:2.5rem; line-height:1;">🚗</div>
+                <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 id="modal-vehicle-model" style="font-size:1.1rem; font-weight:700; color:#fff;">—</h4>
+                        <span id="modal-vehicle-type"></span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.25rem;">
+                        <span style="font-size:0.8rem; color:var(--text-muted);">Vehicle ID: <code id="modal-vehicle-id" style="color:#fff;">—</code></span>
+                        <strong id="modal-vehicle-rate" style="color:#fff; font-size:0.95rem;">—</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Form -->
+            <form id="customer-booking-form" onsubmit="submitCustomerBooking(event)">
+
+                <!-- Customer Mode Switcher Tabs -->
+                <div class="customer-tabs">
+                    <button type="button" class="customer-tab-btn active" id="tab-btn-existing" onclick="switchCustomerTab('existing')">
+                        👤 Existing Customer
+                    </button>
+                    <button type="button" class="customer-tab-btn" id="tab-btn-new" onclick="switchCustomerTab('new')">
+                        ✨ New Customer
+                    </button>
+                </div>
+
+                <!-- TAB 1: EXISTING CUSTOMER (ENTER USER CODE) -->
+                <div id="customer-existing-section">
+                    <div class="form-group">
+                        <label class="form-label" for="verify-id-input">
+                            Enter Your Customer ID or Phone *
+                        </label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input class="form-control" id="verify-id-input" type="text" placeholder="e.g. CUST001 or 9876543210" style="text-transform:uppercase;">
+                            <button type="button" class="btn btn-outline" id="verify-cust-btn" onclick="verifyCustomer()" style="white-space:nowrap;">
+                                Verify ID
+                            </button>
+                        </div>
+                        <span class="form-hint">Enter the unique code given during your previous booking.</span>
+                    </div>
+
+                    <!-- Verified customer alert card -->
+                    <div id="verified-customer-box" class="verified-customer-alert" style="display:none;">
+                        <div>
+                            <div style="font-weight:700; color:#fff;" id="verified-cust-name">John Doe</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);" id="verified-cust-details">ID: CUST001</div>
+                        </div>
+                        <span style="font-size:0.8rem; color:#fff; font-weight:700; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:999px;">
+                            ✓ Verified
+                        </span>
+                    </div>
+                </div>
+
+                <!-- TAB 2: NEW CUSTOMER (REGISTER & GENERATE ID) -->
+                <div id="customer-new-section" style="display:none;">
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.75rem 1rem; margin-bottom:1rem; font-size:0.8rem; color:var(--text-secondary);">
+                        💡 <strong>First time renting?</strong> Enter your details below. A <strong>unique Customer ID</strong> will be generated automatically for you!
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="new-cust-name">Full Name *</label>
+                        <input class="form-control" id="new-cust-name" type="text" placeholder="e.g. Alex Johnson">
+                    </div>
+
+                    <div class="two-col">
+                        <div class="form-group">
+                            <label class="form-label" for="new-cust-phone">Phone Number *</label>
+                            <input class="form-control" id="new-cust-phone" type="tel" placeholder="10-digit mobile" maxlength="15">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="new-cust-email">Email (Optional)</label>
+                            <input class="form-control" id="new-cust-email" type="email" placeholder="alex@example.com">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RENTAL DURATION -->
+                <div class="form-group" style="margin-top:1rem;">
+                    <label class="form-label" for="book-days">Number of Rental Days *</label>
+                    <input class="form-control" id="book-days" type="number" min="1" max="180" value="1" required oninput="updateBookingQuote()">
+                </div>
+
+                <!-- KILOMETERS (FOR TRUCK ONLY) -->
+                <div class="form-group" id="book-truck-km-group" style="display:none;">
+                    <label class="form-label" for="book-km">Estimated Distance (Kilometers) *</label>
+                    <input class="form-control" id="book-km" type="number" min="0" value="50" oninput="updateBookingQuote()">
+                    <span class="form-hint">Trucks include an additional distance-based charge per kilometer.</span>
+                </div>
+
+                <!-- LIVE QUOTE PREVIEW -->
+                <div class="calc-preview">
+                    <div class="calc-title">💰 Live Rental Estimate</div>
+                    <div id="quote-details"></div>
+                    <div class="calc-total">
+                        <span>Total Rental Cost</span>
+                        <span id="quote-total" style="color:#FFFFFF;">₹0</span>
+                    </div>
+                </div>
+
+                <!-- SUBMIT BUTTONS -->
+                <div style="margin-top:1.5rem; display:flex; gap:0.75rem;">
+                    <button type="button" class="btn btn-outline" style="flex:1;" onclick="closeModal('booking-modal')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" style="flex:2;" id="confirm-booking-btn">
+                        ⚡ Confirm & Book Vehicle
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================
+     BOOKING SUCCESS RECEIPT MODAL
+     ====================================================== -->
+<div class="modal-overlay" id="booking-success-modal">
+    <div class="modal" style="max-width:550px;">
+        <div class="modal-header">
+            <h3>Booking Confirmation</h3>
+            <button class="modal-close" onclick="closeModal('booking-success-modal')">✕</button>
+        </div>
+        <div class="modal-body" id="receipt-content-area">
+            <!-- Dynamically populated by customer-portal.js -->
+        </div>
+        <div class="modal-footer" style="display:flex; justify-content:space-between; gap:0.5rem; padding-top:1rem;">
+            <a href="#my-bookings-section" class="btn btn-outline btn-sm" onclick="closeModal('booking-success-modal')">
+                View in My Bookings
+            </a>
+            <button class="btn btn-primary btn-sm" onclick="closeModal('booking-success-modal')">
+                Done
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================
+     ADMIN LOGIN MODAL
+     ====================================================== -->
+<div class="modal-overlay" id="admin-login-modal">
+    <div class="modal" style="max-width:420px;">
+        <div class="modal-header">
+            <h3>🔐 Admin & Owner Login</h3>
+            <button class="modal-close" onclick="closeModal('admin-login-modal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.25rem;">
+                Sign in to access fleet management, revenue history, customer registry, and vehicle return terminals.
+            </p>
+
+            <form id="admin-login-form" onsubmit="submitAdminLogin(event)">
+                <div class="form-group">
+                    <label class="form-label" for="admin-user">Username</label>
+                    <input class="form-control" id="admin-user" type="text" placeholder="admin" value="admin" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="admin-pass">Password</label>
+                    <input class="form-control" id="admin-pass" type="password" placeholder="admin123" value="admin123" required>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.5rem;">
+                    <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
+                        Enter Owner Portal →
+                    </button>
+                    <button type="button" class="btn btn-outline" style="width:100%; justify-content:center; font-size:0.8rem;" onclick="quickAdminLogin()">
+                        ⚡ 1-Click Quick Demo Sign-In
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer style="border-top:1px solid var(--border); padding:2rem; text-align:center; color:var(--text-muted); font-size:0.85rem; margin-top:4rem;">
+    <p>RENTX — Multi-Level Vehicle Rental Platform · Powered by Spring Boot & OOP Principles</p>
+</footer>
+
+<script src="js/app.js"></script>
+<script src="js/customer-portal.js"></script>
+</body>
+</html>

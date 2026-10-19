@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Return a rented vehicle through RENTX.">
+    <title>Return Vehicle – RENTX</title>
+    <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand">
+        <div class="brand-logo" style="background:linear-gradient(135deg, #fff, #888); color:#000;">RX</div>
+        <div>
+            <span class="brand-name">RENTX <span style="font-size:0.75rem; vertical-align:middle; margin-left:6px; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; font-weight:600;">👑 OWNER PORTAL</span></span>
+            <span class="brand-subtitle">Internal Fleet & Rental Management</span>
+        </div>
+    </div>
+    <ul class="nav-links">
+        <li><a href="admin.html">🏠 Dashboard</a></li>
+        <li><a href="vehicles.html">🚗 Vehicles</a></li>
+        <li><a href="customers.html">👥 Customers</a></li>
+        <li><a href="rental.html">🔑 Rent</a></li>
+        <li><a href="return.html" class="active">↩️ Return</a></li>
+        <li><a href="history.html">📋 History</a></li>
+    </ul>
+    <div style="display:flex; align-items:center; gap:0.75rem; margin-left:auto;">
+        <a href="index.html" class="btn btn-outline btn-sm" title="View customer portal">
+            👤 Switch to Customer View
+        </a>
+        <button onclick="logoutAdmin()" class="btn btn-sm" style="background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text-secondary);" title="Exit admin session">
+            🚪 Logout
+        </button>
+    </div>
+</nav>
+
+<div class="page-header">
+    <h1>↩️ Return Vehicle</h1>
+    <p>Process a vehicle return and calculate any late fees.</p>
+</div>
+
+<main class="main-content">
+    <div class="two-col" style="align-items:start;">
+
+        <!-- Active Rentals -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h2>Active Rentals</h2>
+                <span id="active-count" class="badge badge-active pulse">Loading...</span>
+            </div>
+            <div id="active-rentals-list">
+                <div class="loading-overlay"><div class="spinner"></div> Loading...</div>
+            </div>
+        </div>
+
+        <!-- Return Panel -->
+        <div class="card fade-in" id="return-panel" style="display:none;">
+            <div class="card-header">
+                <h2>↩️ Process Return</h2>
+                <button class="btn btn-outline btn-sm" onclick="clearReturnPanel()">← Back</button>
+            </div>
+            <div class="card-body">
+                <!-- Selected Rental Info -->
+                <div id="selected-rental-info" class="receipt-box" style="margin-bottom:1.5rem;"></div>
+
+                <!-- Return Date Option -->
+                <div class="form-group">
+                    <label class="form-label">Return Date</label>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                        <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.875rem; cursor:pointer;">
+                            <input type="radio" name="return-option" value="today" id="opt-today" checked onchange="toggleReturnInput()">
+                            Return Today (<span id="today-date"></span>)
+                        </label>
+                        <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.875rem; cursor:pointer;">
+                            <input type="radio" name="return-option" value="date" id="opt-date" onchange="toggleReturnInput()">
+                            Enter specific date
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" id="date-input-group" style="display:none;">
+                    <label class="form-label" for="return-date">Return Date</label>
+                    <input class="form-control" type="date" id="return-date" onchange="previewLateFee()">
+                </div>
+
+                <!-- Late Fee Preview -->
+                <div id="late-fee-preview" style="display:none;">
+                    <div class="calc-preview" style="margin-bottom:1rem;">
+                        <div class="calc-title">💸 Return Calculation</div>
+                        <div id="return-calc-details"></div>
+                        <div class="calc-total">
+                            <span>Final Amount</span>
+                            <span id="return-final-amount" style="color:var(--success)">₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-success btn-full btn-lg" id="process-return-btn" onclick="processReturn()">
+                    ↩️ Confirm Return
+                </button>
+            </div>
+        </div>
+
+        <!-- Return Receipt (shown after processing) -->
+        <div class="card fade-in" id="return-receipt-panel" style="display:none;">
+            <div class="card-header" style="background:rgba(255,255,255,0.06);">
+                <h2 style="color:var(--text-primary);">✅ Vehicle Returned!</h2>
+            </div>
+            <div class="card-body">
+                <div id="return-receipt-content"></div>
+                <div style="margin-top:1.5rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
+                    <button onclick="resetReturnPage()" class="btn btn-outline" style="flex:1;">Process Another</button>
+                    <a href="history.html" class="btn btn-primary" style="flex:1; justify-content:center;">View History</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script src="js/app.js"></script>
+<script>
+    let selectedRental = null;
+
+    async function loadActiveRentals() {
+        try {
+            const rentals = await apiFetch('/rentals?active=true');
+            const countEl = document.getElementById('active-count');
+            countEl.textContent = `${rentals.length} active`;
+            countEl.classList.remove('pulse');
+
+            const container = document.getElementById('active-rentals-list');
+
+            if (rentals.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">✅</div>
+                        <h3>No active rentals</h3>
+                        <p>All vehicles have been returned. <a href="rental.html" style="color:var(--primary-light)">Rent a vehicle</a> to get started.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-wrapper">
+                    <table class="table">
+                        <thead>
+                            <tr><th>Rental ID</th><th>Customer</th><th>Vehicle</th><th>Due Date</th><th>Amount</th><th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                            ${rentals.map(r => {
+                                const isLate = new Date(r.expectedReturnDate) < new Date();
+                                return `
+                                <tr>
+                                    <td><code style="color:var(--primary-light)">${r.rentalId}</code></td>
+                                    <td>${r.customer?.name || '—'}</td>
+                                    <td>${vehicleIcon(r.vehicle?.vehicleType)} ${r.vehicle?.model || '—'} [${r.vehicle?.vehicleId || '—'}]</td>
+                                    <td>
+                                        <span style="color:${isLate ? 'var(--danger)' : 'var(--text-primary)'}">
+                                            ${isLate ? '⚠️ ' : ''}${formatDate(r.expectedReturnDate)}
+                                        </span>
+                                    </td>
+                                    <td style="color:var(--success); font-weight:600;">${formatCurrency(r.baseAmount)}</td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm" onclick="selectRentalForReturn(${JSON.stringify(r).replace(/"/g, '&quot;')})">
+                                            ↩️ Return
+                                        </button>
+                                    </td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+        } catch (err) {
+            document.getElementById('active-rentals-list').innerHTML =
+                `<div class="empty-state"><div class="icon">⚠️</div><p>${err.message}</p></div>`;
+            showToast(err.message, 'error');
+        }
+    }
+
+    function selectRentalForReturn(rental) {
+        selectedRental = rental;
+
+        // Set today's date display
+        document.getElementById('today-date').textContent = formatDate(new Date().toISOString());
+
+        // Set min date for date picker
+        const dateInput = document.getElementById('return-date');
+        dateInput.min = rental.rentalDate;
+        dateInput.value = new Date().toISOString().split('T')[0];
+
+        // Show rental info in panel
+        document.getElementById('selected-rental-info').innerHTML = `
+            <div class="receipt-row"><span class="label">Rental ID</span><span class="value" style="color:var(--primary-light)">${rental.rentalId}</span></div>
+            <div class="receipt-row"><span class="label">Customer</span><span class="value">${rental.customer?.name}</span></div>
+            <div class="receipt-row"><span class="label">Vehicle</span><span class="value">${rental.vehicle?.model} [${rental.vehicle?.vehicleId}]</span></div>
+            <div class="receipt-row"><span class="label">Rental Days</span><span class="value">${rental.numberOfDays}</span></div>
+            <div class="receipt-row"><span class="label">Base Amount</span><span class="value">${formatCurrency(rental.baseAmount)}</span></div>
+            <div class="receipt-row"><span class="label">Expected Return</span><span class="value">${formatDate(rental.expectedReturnDate)}</span></div>
+        `;
+
+        document.getElementById('return-panel').style.display = 'block';
+        document.getElementById('return-receipt-panel').style.display = 'none';
+        previewLateFee();
+
+        // Scroll to return panel
+        document.getElementById('return-panel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleReturnInput() {
+        const useDate = document.getElementById('opt-date').checked;
+        document.getElementById('date-input-group').style.display = useDate ? 'block' : 'none';
+        previewLateFee();
+    }
+
+    function previewLateFee() {
+        if (!selectedRental) return;
+
+        let returnDate;
+        if (document.getElementById('opt-today').checked) {
+            returnDate = new Date();
+        } else {
+            const val = document.getElementById('return-date').value;
+            if (!val) return;
+            returnDate = new Date(val);
+        }
+
+        const expected = new Date(selectedRental.expectedReturnDate);
+        const msPerDay = 24 * 60 * 60 * 1000;
+        const lateDays = Math.max(0, Math.floor((returnDate - expected) / msPerDay));
+        const lateFee = lateDays * 500;
+        const total = selectedRental.baseAmount + lateFee;
+
+        document.getElementById('late-fee-preview').style.display = 'block';
+        document.getElementById('return-calc-details').innerHTML = `
+            <div class="calc-row"><span>Original Amount</span><span>${formatCurrency(selectedRental.baseAmount)}</span></div>
+            <div class="calc-row">
+                <span>Late Fee (${lateDays} day(s) × ₹500)</span>
+                <span style="color:${lateFee > 0 ? 'var(--danger)' : 'var(--success)'}">
+                    ${lateFee > 0 ? '+' : ''}${formatCurrency(lateFee)}
+                </span>
+            </div>`;
+        document.getElementById('return-final-amount').textContent = formatCurrency(total);
+    }
+
+    async function processReturn() {
+        if (!selectedRental) return;
+
+        const btn = document.getElementById('process-return-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div> Processing...';
+
+        let returnDate;
+        if (document.getElementById('opt-today').checked) {
+            returnDate = new Date().toISOString().split('T')[0];
+        } else {
+            returnDate = document.getElementById('return-date').value;
+            if (!returnDate) {
+                showToast('Please select a return date.', 'warning');
+                btn.disabled = false;
+                btn.textContent = '↩️ Confirm Return';
+                return;
+            }
+        }
+
+        try {
+            const rental = await apiFetch(`/rentals/${selectedRental.rentalId}/return`, {
+                method: 'POST',
+                body: { returnDate }
+            });
+
+            showReturnReceipt(rental);
+            await loadActiveRentals();
+            showToast('Vehicle returned successfully!', 'success');
+
+        } catch (err) {
+            showToast(err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '↩️ Confirm Return';
+        }
+    }
+
+    function showReturnReceipt(rental) {
+        document.getElementById('return-panel').style.display = 'none';
+        const receiptPanel = document.getElementById('return-receipt-panel');
+        receiptPanel.style.display = 'block';
+
+        document.getElementById('return-receipt-content').innerHTML = `
+            <div class="receipt-box">
+                <div class="receipt-row"><span class="label">Rental ID</span><span class="value" style="color:var(--primary-light)">${rental.rentalId}</span></div>
+                <div class="receipt-row"><span class="label">Customer</span><span class="value">${rental.customer?.name}</span></div>
+                <div class="receipt-row"><span class="label">Vehicle</span><span class="value">${rental.vehicle?.model} [${rental.vehicle?.vehicleId}]</span></div>
+                <div class="receipt-row"><span class="label">Rental Period</span><span class="value">${rental.numberOfDays} day(s)</span></div>
+                <div class="receipt-row"><span class="label">Rental Date</span><span class="value">${formatDate(rental.rentalDate)}</span></div>
+                <div class="receipt-row"><span class="label">Return Date</span><span class="value">${formatDate(rental.actualReturnDate)}</span></div>
+                <div class="section-divider" style="margin:0.75rem 0;"></div>
+                <div class="receipt-row"><span class="label">Original Amount</span><span class="value">${formatCurrency(rental.baseAmount)}</span></div>
+                <div class="receipt-row">
+                    <span class="label">Late Fee</span>
+                    <span class="value" style="color:${rental.lateFee > 0 ? 'var(--danger)' : 'var(--success)'}">
+                        ${formatCurrency(rental.lateFee)}
+                    </span>
+                </div>
+                <div class="receipt-total">
+                    <div class="row">
+                        <span>Final Amount</span>
+                        <span class="amount">${formatCurrency(rental.totalAmount)}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:1rem; text-align:center;">
+                <span class="badge badge-available" style="font-size:0.85rem;">Vehicle Status: AVAILABLE</span>
+            </div>`;
+
+        receiptPanel.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function clearReturnPanel() {
+        selectedRental = null;
+        document.getElementById('return-panel').style.display = 'none';
+        document.getElementById('late-fee-preview').style.display = 'none';
+    }
+
+    function resetReturnPage() {
+        clearReturnPanel();
+        document.getElementById('return-receipt-panel').style.display = 'none';
+        document.getElementById('opt-today').checked = true;
+        document.getElementById('date-input-group').style.display = 'none';
+    }
+
+    loadActiveRentals();
+</script>
+</body>
+</html>

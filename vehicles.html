@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse and manage vehicles in RENTX rental system.">
+    <title>Vehicles – RENTX</title>
+    <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand">
+        <div class="brand-logo" style="background:linear-gradient(135deg, #fff, #888); color:#000;">RX</div>
+        <div>
+            <span class="brand-name">RENTX <span style="font-size:0.75rem; vertical-align:middle; margin-left:6px; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; font-weight:600;">👑 OWNER PORTAL</span></span>
+            <span class="brand-subtitle">Internal Fleet & Rental Management</span>
+        </div>
+    </div>
+    <ul class="nav-links">
+        <li><a href="admin.html">🏠 Dashboard</a></li>
+        <li><a href="vehicles.html" class="active">🚗 Vehicles</a></li>
+        <li><a href="customers.html">👥 Customers</a></li>
+        <li><a href="rental.html">🔑 Rent</a></li>
+        <li><a href="return.html">↩️ Return</a></li>
+        <li><a href="history.html">📋 History</a></li>
+    </ul>
+    <div style="display:flex; align-items:center; gap:0.75rem; margin-left:auto;">
+        <a href="index.html" class="btn btn-outline btn-sm" title="View customer portal">
+            👤 Switch to Customer View
+        </a>
+        <button onclick="logoutAdmin()" class="btn btn-sm" style="background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text-secondary);" title="Exit admin session">
+            🚪 Logout
+        </button>
+    </div>
+</nav>
+
+<div class="page-header">
+    <h1>🚗 Vehicle Fleet</h1>
+    <p>Browse, search, and manage all vehicles in the system.</p>
+</div>
+
+<main class="main-content">
+    <!-- Filter & Search Bar -->
+    <div class="filter-bar">
+        <div class="search-input">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Search by ID, model, or type..." oninput="filterVehicles()">
+        </div>
+        <select class="filter-select" id="type-filter" onchange="filterVehicles()">
+            <option value="">All Types</option>
+            <option value="Car">🚗 Car</option>
+            <option value="Bike">🏍️ Bike</option>
+            <option value="Truck">🚛 Truck</option>
+        </select>
+        <select class="filter-select" id="avail-filter" onchange="filterVehicles()">
+            <option value="">All Status</option>
+            <option value="available">✅ Available</option>
+            <option value="rented">🔑 Rented</option>
+        </select>
+        <button class="btn btn-primary" onclick="openModal('add-vehicle-modal')">
+            ➕ Add Vehicle
+        </button>
+    </div>
+
+    <!-- Vehicle Count -->
+    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;" id="vehicle-count"></p>
+
+    <!-- Vehicles Grid -->
+    <div id="vehicles-container">
+        <div class="loading-overlay"><div class="spinner"></div> Loading vehicles...</div>
+    </div>
+</main>
+
+<!-- ADD VEHICLE MODAL -->
+<div class="modal-overlay" id="add-vehicle-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>➕ Register New Vehicle</h3>
+            <button class="modal-close" onclick="closeModal('add-vehicle-modal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <form id="add-vehicle-form" onsubmit="submitVehicle(event)">
+                <div class="form-group">
+                    <label class="form-label" for="v-type">Vehicle Type *</label>
+                    <select class="form-control" id="v-type" required onchange="toggleTruckFields()">
+                        <option value="">Select type...</option>
+                        <option value="Car">🚗 Car</option>
+                        <option value="Bike">🏍️ Bike</option>
+                        <option value="Truck">🚛 Truck</option>
+                    </select>
+                </div>
+                <div class="two-col">
+                    <div class="form-group">
+                        <label class="form-label" for="v-id">Vehicle ID *</label>
+                        <input class="form-control" id="v-id" type="text" placeholder="e.g. C104" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="v-model">Model *</label>
+                        <input class="form-control" id="v-model" type="text" placeholder="e.g. Toyota Innova" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="v-rate">Base Rate per Day (₹) *</label>
+                    <input class="form-control" id="v-rate" type="number" min="1" placeholder="e.g. 1500" required>
+                </div>
+                <div class="form-group" id="truck-km-field" style="display:none;">
+                    <label class="form-label" for="v-km-charge">Per Kilometer Charge (₹) *</label>
+                    <input class="form-control" id="v-km-charge" type="number" min="0" step="0.5" placeholder="e.g. 15">
+                </div>
+                <!-- Bike info -->
+                <div id="bike-info" style="display:none; background:rgba(78,205,196,0.08); border:1px solid rgba(78,205,196,0.2); border-radius:8px; padding:0.75rem; font-size:0.8rem; color:var(--accent); margin-bottom:1rem;">
+                    ℹ️ Bikes get a 15% discount factor applied to rentals automatically.
+                </div>
+                <div class="modal-footer" style="padding:0; border:none; margin-top:0.5rem;">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('add-vehicle-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="add-vehicle-btn">Register Vehicle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/vehicles.js"></script>
+</body>
+</html>

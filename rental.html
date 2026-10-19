@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Rent a vehicle through RENTX.">
+    <title>Rent a Vehicle – RENTX</title>
+    <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand">
+        <div class="brand-logo" style="background:linear-gradient(135deg, #fff, #888); color:#000;">RX</div>
+        <div>
+            <span class="brand-name">RENTX <span style="font-size:0.75rem; vertical-align:middle; margin-left:6px; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; font-weight:600;">👑 OWNER PORTAL</span></span>
+            <span class="brand-subtitle">Internal Fleet & Rental Management</span>
+        </div>
+    </div>
+    <ul class="nav-links">
+        <li><a href="admin.html">🏠 Dashboard</a></li>
+        <li><a href="vehicles.html">🚗 Vehicles</a></li>
+        <li><a href="customers.html">👥 Customers</a></li>
+        <li><a href="rental.html" class="active">🔑 Rent</a></li>
+        <li><a href="return.html">↩️ Return</a></li>
+        <li><a href="history.html">📋 History</a></li>
+    </ul>
+    <div style="display:flex; align-items:center; gap:0.75rem; margin-left:auto;">
+        <a href="index.html" class="btn btn-outline btn-sm" title="View customer portal">
+            👤 Switch to Customer View
+        </a>
+        <button onclick="logoutAdmin()" class="btn btn-sm" style="background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text-secondary);" title="Exit admin session">
+            🚪 Logout
+        </button>
+    </div>
+</nav>
+
+<div class="page-header">
+    <h1>🔑 Rent a Vehicle</h1>
+    <p>Select a customer and vehicle, then confirm the rental.</p>
+</div>
+
+<main class="main-content">
+    <div class="two-col" style="align-items:start;">
+
+        <!-- RENTAL FORM -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h2>Rental Details</h2>
+            </div>
+            <div class="card-body">
+                <form id="rental-form" onsubmit="confirmRental(event)">
+
+                    <!-- Customer Selection -->
+                    <div class="form-group">
+                        <label class="form-label" for="r-customer">Customer *</label>
+                        <select class="form-control" id="r-customer" required onchange="onCustomerChange()">
+                            <option value="">Loading customers...</option>
+                        </select>
+                    </div>
+
+                    <!-- Customer Info Display -->
+                    <div id="customer-info-box" style="display:none; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:0.75rem 1rem; margin-bottom:1.25rem; font-size:0.85rem;">
+                        <div id="customer-info-text" style="color:var(--text-secondary)"></div>
+                    </div>
+
+                    <!-- Vehicle Selection -->
+                    <div class="form-group">
+                        <label class="form-label" for="r-vehicle">Vehicle *</label>
+                        <select class="form-control" id="r-vehicle" required onchange="onVehicleChange()">
+                            <option value="">Loading vehicles...</option>
+                        </select>
+                    </div>
+
+                    <!-- Vehicle Info Display -->
+                    <div id="vehicle-info-box" style="display:none; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:0.75rem 1rem; margin-bottom:1.25rem; font-size:0.85rem;">
+                        <div id="vehicle-info-text"></div>
+                    </div>
+
+                    <!-- Rental Days -->
+                    <div class="form-group">
+                        <label class="form-label" for="r-days">Number of Days *</label>
+                        <input class="form-control" id="r-days" type="number" min="1" max="365"
+                               placeholder="e.g. 3" required oninput="updateCalculation()">
+                    </div>
+
+                    <!-- Kilometers (Truck only) -->
+                    <div class="form-group" id="km-field" style="display:none;">
+                        <label class="form-label" for="r-km">Estimated Kilometers (for Truck) *</label>
+                        <input class="form-control" id="r-km" type="number" min="0"
+                               placeholder="e.g. 200" oninput="updateCalculation()">
+                    </div>
+
+                    <!-- Amount Preview -->
+                    <div id="amount-preview" style="display:none;">
+                        <div class="calc-preview">
+                            <div class="calc-title">💰 Rental Cost Estimate</div>
+                            <div id="calc-details"></div>
+                            <div class="calc-total">
+                                <span>Total Estimated Amount</span>
+                                <span id="calc-total-amount" style="color:var(--success)">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:1.5rem; display:flex; gap:0.75rem;">
+                        <a href="vehicles.html" class="btn btn-outline" style="flex:1; justify-content:center;">← Back</a>
+                        <button type="submit" class="btn btn-primary" style="flex:2; justify-content:center;" id="rent-btn">
+                            🔑 Confirm Rental
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- RENTAL CONFIRMATION RECEIPT (shown after rent) -->
+        <div id="confirmation-panel" style="display:none;" class="fade-in">
+            <div class="card">
+                <div class="card-header" style="background: rgba(255,255,255,0.06);">
+                    <h2 style="color:var(--text-primary);">✅ Rental Confirmed!</h2>
+                </div>
+                <div class="card-body">
+                    <div id="receipt-content"></div>
+                    <div style="margin-top:1.5rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
+                        <button onclick="resetForm()" class="btn btn-outline" style="flex:1;">New Rental</button>
+                        <a href="history.html" class="btn btn-primary" style="flex:1; justify-content:center;">View History</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div id="info-panel" class="card fade-in" style="background:linear-gradient(135deg, rgba(108,99,255,0.05), rgba(78,205,196,0.03));">
+            <div class="card-body">
+                <h3 style="font-size:0.9rem; color:var(--primary-light); margin-bottom:1rem;">ℹ️ Pricing Logic (OOP Polymorphism)</h3>
+                <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                    <div style="padding:0.75rem; background:var(--bg-input); border-radius:8px; font-size:0.82rem;">
+                        <div style="font-weight:700; margin-bottom:0.25rem;">🚗 Car</div>
+                        <div style="color:var(--text-secondary);">Rate × Days</div>
+                    </div>
+                    <div style="padding:0.75rem; background:var(--bg-input); border-radius:8px; font-size:0.82rem;">
+                        <div style="font-weight:700; margin-bottom:0.25rem;">🏍️ Bike</div>
+                        <div style="color:var(--text-secondary);">Rate × Days × 0.85 (15% discount)</div>
+                    </div>
+                    <div style="padding:0.75rem; background:var(--bg-input); border-radius:8px; font-size:0.82rem;">
+                        <div style="font-weight:700; margin-bottom:0.25rem;">🚛 Truck</div>
+                        <div style="color:var(--text-secondary);">(Rate × Days) + (Km × Per-Km Charge)</div>
+                    </div>
+                    <div style="padding:0.75rem; background:rgba(239,71,111,0.08); border:1px solid rgba(239,71,111,0.15); border-radius:8px; font-size:0.82rem;">
+                        <div style="font-weight:700; margin-bottom:0.25rem; color:var(--danger);">Late Fee</div>
+                        <div style="color:var(--text-secondary);">Extra Days × ₹500/day</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script src="js/app.js"></script>
+<script src="js/rental.js"></script>
+</body>
+</html>

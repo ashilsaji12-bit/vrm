@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View complete rental history in RENTX.">
+    <title>Rental History – RENTX</title>
+    <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-brand">
+        <div class="brand-logo" style="background:linear-gradient(135deg, #fff, #888); color:#000;">RX</div>
+        <div>
+            <span class="brand-name">RENTX <span style="font-size:0.75rem; vertical-align:middle; margin-left:6px; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; font-weight:600;">👑 OWNER PORTAL</span></span>
+            <span class="brand-subtitle">Internal Fleet & Rental Management</span>
+        </div>
+    </div>
+    <ul class="nav-links">
+        <li><a href="admin.html">🏠 Dashboard</a></li>
+        <li><a href="vehicles.html">🚗 Vehicles</a></li>
+        <li><a href="customers.html">👥 Customers</a></li>
+        <li><a href="rental.html">🔑 Rent</a></li>
+        <li><a href="return.html">↩️ Return</a></li>
+        <li><a href="history.html" class="active">📋 History</a></li>
+    </ul>
+    <div style="display:flex; align-items:center; gap:0.75rem; margin-left:auto;">
+        <a href="index.html" class="btn btn-outline btn-sm" title="View customer portal">
+            👤 Switch to Customer View
+        </a>
+        <button onclick="logoutAdmin()" class="btn btn-sm" style="background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text-secondary);" title="Exit admin session">
+            🚪 Logout
+        </button>
+    </div>
+</nav>
+
+<div class="page-header">
+    <h1>📋 Rental History</h1>
+    <p>View all rental transactions, past and active.</p>
+</div>
+
+<main class="main-content">
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+        <div class="search-input">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="history-search" placeholder="Search by rental ID, customer, or vehicle..." oninput="filterHistory()">
+        </div>
+        <select class="filter-select" id="status-filter" onchange="filterHistory()">
+            <option value="">All Status</option>
+            <option value="ACTIVE">⏳ Active</option>
+            <option value="RETURNED">✓ Returned</option>
+        </select>
+        <select class="filter-select" id="type-filter-h" onchange="filterHistory()">
+            <option value="">All Types</option>
+            <option value="Car">🚗 Car</option>
+            <option value="Bike">🏍️ Bike</option>
+            <option value="Truck">🚛 Truck</option>
+        </select>
+    </div>
+
+    <p id="history-count" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;"></p>
+
+    <!-- History Table -->
+    <div class="card fade-in">
+        <div id="history-table-wrapper">
+            <div class="loading-overlay"><div class="spinner"></div> Loading rental history...</div>
+        </div>
+    </div>
+
+</main>
+
+<script src="js/app.js"></script>
+<script src="js/history.js"></script>
+</body>
+</html>
